@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - AI 역량 진단</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .stat-card .number {
+            font-size: 3em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chart-section {
+            margin-bottom: 50px;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-right: 15px;
+            border-radius: 3px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .level-전문가 {
+            background: linear-gradient(135deg, #96ceb4 0%, #7db8a0 100%);
+            color: white;
+        }
+        
+        .level-고급 {
+            background: linear-gradient(135deg, #45b7d1 0%, #3a9bb8 100%);
+            color: white;
+        }
+        
+        .level-중급 {
+            background: linear-gradient(135deg, #4ecdc4 0%, #42b0a8 100%);
+            color: white;
+        }
+        
+        .level-초급 {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5555 100%);
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 10px 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5555 100%);
+            padding: 8px 15px;
+            font-size: 0.85em;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.85em;
+            }
+            
+            th, td {
+                padding: 12px 10px;
+            }
+            
+            .back-link {
+                position: static;
+                display: block;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-link">← 진단 페이지로</a>
+            <h1>👥 관리자 페이지</h1>
+            <p style="color: #666; margin-top: 10px;">AI 역량 진단 결과 관리 시스템</p>
+        </div>
+        
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <h3>총 진단 인원</h3>
+                <div class="number" id="totalCount">0</div>
+                <p style="color: #999; font-size: 0.85em; margin-top: 10px;">명</p>
+            </div>
+            <div class="stat-card">
+                <h3>평균 점수</h3>
+                <div class="number" id="avgScore">0</div>
+                <p style="color: #999; font-size: 0.85em; margin-top: 10px;">/ 25점</p>
+            </div>
+            <div class="stat-card">
+                <h3>평균 달성률</h3>
+                <div class="number" id="avgPercent">0</div>
+                <p style="color: #999; font-size: 0.85em; margin-top: 10px;">%</p>
+            </div>
+            <div class="stat-card">
+                <h3>고급 이상</h3>
+                <div class="number" id="highLevel">0</div>
+                <p style="color: #999; font-size: 0.85em; margin-top: 10px;">명</p>
+            </div>
+        </div>
+        
+        <div class="chart-section">
+            <h2 class="section-title">📊 레벨 분포</h2>
+            <div class="chart-container">
+                <canvas id="levelChart"></canvas>
+            </div>
+        </div>
+        
+        <div>
+            <h2 class="section-title">📋 개별 진단 결과</h2>
+            <div style="margin-bottom: 20px; text-align: right;">
+                <button onclick="exportCSV()">📥 CSV 다운로드</button>
+                <button onclick="clearAll()" class="delete-btn">🗑️ 전체 삭제</button>
+            </div>
+            <div id="resultsTable"></div>
+        </div>
+    </div>
+
+    <script>
+        let levelChart;
+        
+        function loadResults() {
+            const results = JSON.parse(localStorage.getItem('aiAssessmentResults') || '[]');
+            
+            if (results.length === 0) {
+                document.getElementById('resultsTable').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>아직 진단 결과가 없습니다</h3>
+                        <p style="margin-top: 10px;">진단을 완료한 결과가 여기에 표시됩니다.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 통계 계산
+            const totalCount = results.length;
+            const totalScore = results.reduce((sum, r) => sum + r.score, 0);
+            const avgScore = (totalScore / totalCount).toFixed(1);
+            const avgPercent = ((avgScore / 25) * 100).toFixed(1);
+            const highLevel = results.filter(r => r.level === '고급' || r.level === '전문가').length;
+            
+            // 레벨별 집계
+            const levelCounts = {
+                '초급': results.filter(r => r.level === '초급').length,
+                '중급': results.filter(r => r.level === '중급').length,
+                '고급': results.filter(r => r.level === '고급').length,
+                '전문가': results.filter(r => r.level === '전문가').length
+            };
+            
+            // 통계 표시
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('avgScore').textContent = avgScore;
+            document.getElementById('avgPercent').textContent = avgPercent;
+            document.getElementById('highLevel').textContent = highLevel;
+            
+            // 차트 생성
+            createLevelChart(levelCounts);
+            
+            // 테이블 생성
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>부서</th>
+                            <th>직위</th>
+                            <th>점수</th>
+                            <th>달성률</th>
+                            <th>레벨</th>
+                            <th>진단일시</th>
+                            <th>삭제</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${results.reverse().map(r => `
+                            <tr>
+                                <td><strong>${r.name}</strong></td>
+                                <td>${r.department}</td>
+                                <td>${r.position}</td>
+                                <td><strong>${r.score}</strong> / 25점</td>
+                                <td>${r.percentage.toFixed(1)}%</td>
+                                <td><span class="level-badge level-${r.level}">${r.level}</span></td>
+                                <td style="font-size: 0.85em; color: #666;">${r.timestamp}</td>
+                                <td>
+                                    <button class="delete-btn" onclick="deleteResult(${r.id})">삭제</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('resultsTable').innerHTML = tableHTML;
+        }
+        
+        function createLevelChart(levelCounts) {
+            const ctx = document.getElementById('levelChart');
+            
+            if (levelChart) {
+                levelChart.destroy();
+            }
+            
+            levelChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['초급', '중급', '고급', '전문가'],
+                    datasets: [{
+                        label: '인원 수',
+                        data: [
+                            levelCounts['초급'],
+                            levelCounts['중급'],
+                            levelCounts['고급'],
+                            levelCounts['전문가']
+                        ],
+                        backgroundColor: [
+                            'rgba(255, 107, 107, 0.8)',
+                            'rgba(78, 205, 196, 0.8)',
+                            'rgba(69, 183, 209, 0.8)',
+                            'rgba(150, 206, 180, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(255, 107, 107)',
+                            'rgb(78, 205, 196)',
+                            'rgb(69, 183, 209)',
+                            'rgb(150, 206, 180)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function deleteResult(id) {
+            if (!confirm('이 진단 결과를 삭제하시겠습니까?')) return;
+            
+            let results = JSON.parse(localStorage.getItem('aiAssessmentResults') || '[]');
+            results = results.filter(r => r.id !== id);
+            localStorage.setItem('aiAssessmentResults', JSON.stringify(results));
+            loadResults();
+            alert('✅ 삭제되었습니다!');
+        }
+        
+        function clearAll() {
+            if (!confirm('⚠️ 모든 진단 결과를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다!')) return;
+            
+            localStorage.removeItem('aiAssessmentResults');
+            loadResults();
+            alert('✅ 모든 데이터가 삭제되었습니다!');
+        }
+        
+        function exportCSV() {
+            const results = JSON.parse(localStorage.getItem('aiAssessmentResults') || '[]');
+            
+            if (results.length === 0) {
+                alert('⚠️ 다운로드할 데이터가 없습니다!');
+                return;
+            }
+            
+            let csv = '이름,부서,직위,점수,달성률,레벨,진단일시\n';
+            results.forEach(r => {
+                csv += `${r.name},${r.department},${r.position},${r.score},${r.percentage.toFixed(1)}%,${r.level},${r.timestamp}\n`;
+            });
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `AI역량진단결과_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            
+            alert('✅ CSV 파일이 다운로드되었습니다!');
+        }
+        
+        // 페이지 로드 시 실행
+        loadResults();
+    </script>
+</body>
+</html>
