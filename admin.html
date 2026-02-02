@@ -20,6 +20,107 @@
             padding: 20px;
         }
         
+        /* 로그인 화면 스타일 */
+        .login-container {
+            max-width: 450px;
+            margin: 100px auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-container h1 {
+            font-size: 2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        
+        .login-container p {
+            color: #666;
+            margin-bottom: 40px;
+        }
+        
+        .login-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .password-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            margin-top: 15px;
+            font-size: 0.9em;
+            display: none;
+        }
+        
+        .back-link-login {
+            display: inline-block;
+            margin-top: 25px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .back-link-login:hover {
+            color: #764ba2;
+        }
+        
+        /* 관리자 페이지 스타일 */
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -28,6 +129,7 @@
             border-radius: 30px;
             padding: 50px;
             box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            display: none;
         }
         
         .header {
@@ -63,6 +165,26 @@
         .back-link:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5555 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
         }
         
         .stats-grid {
@@ -227,7 +349,7 @@
         }
         
         @media (max-width: 768px) {
-            .container {
+            .container, .login-container {
                 padding: 30px 20px;
             }
             
@@ -247,19 +369,44 @@
                 padding: 12px 10px;
             }
             
-            .back-link {
+            .back-link, .logout-btn {
                 position: static;
                 display: block;
                 text-align: center;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- 로그인 화면 -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-icon">🔐</div>
+        <h1>관리자 로그인</h1>
+        <p>비밀번호를 입력하세요</p>
+        
+        <input 
+            type="password" 
+            id="passwordInput" 
+            class="password-input" 
+            placeholder="비밀번호"
+            onkeypress="if(event.keyCode==13) checkPassword()"
+        >
+        
+        <button class="login-btn" onclick="checkPassword()">🔓 로그인</button>
+        
+        <div class="error-message" id="errorMessage">
+            ❌ 비밀번호가 올바르지 않습니다
+        </div>
+        
+        <a href="index.html" class="back-link-login">← 진단 페이지로 돌아가기</a>
+    </div>
+
+    <!-- 관리자 페이지 (로그인 후 표시) -->
+    <div class="container" id="adminContainer">
         <div class="header">
             <a href="index.html" class="back-link">← 진단 페이지로</a>
+            <button class="logout-btn" onclick="logout()">🚪 로그아웃</button>
             <h1>👥 관리자 페이지</h1>
             <p style="color: #666; margin-top: 10px;">AI 역량 진단 결과 관리 시스템</p>
         </div>
@@ -305,7 +452,53 @@
     </div>
 
     <script>
+        // 비밀번호 설정 (여기서 변경하세요!)
+        const ADMIN_PASSWORD = "admin2026";  // ← 원하는 비밀번호로 변경!
+        
         let levelChart;
+        
+        // 페이지 로드 시 로그인 상태 확인
+        window.onload = function() {
+            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+                showAdminPage();
+            }
+        };
+        
+        // 비밀번호 확인
+        function checkPassword() {
+            const inputPassword = document.getElementById('passwordInput').value;
+            
+            if (inputPassword === ADMIN_PASSWORD) {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                showAdminPage();
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+                
+                // 3초 후 에러 메시지 숨김
+                setTimeout(() => {
+                    document.getElementById('errorMessage').style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 관리자 페이지 표시
+        function showAdminPage() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('adminContainer').style.display = 'block';
+            loadResults();
+        }
+        
+        // 로그아웃
+        function logout() {
+            if (confirm('로그아웃하시겠습니까?')) {
+                sessionStorage.removeItem('adminLoggedIn');
+                document.getElementById('adminContainer').style.display = 'none';
+                document.getElementById('loginContainer').style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
         
         function loadResults() {
             const results = JSON.parse(localStorage.getItem('aiAssessmentResults') || '[]');
@@ -423,9 +616,6 @@
                     plugins: {
                         legend: {
                             display: false
-                        },
-                        title: {
-                            display: false
                         }
                     },
                     scales: {
@@ -479,9 +669,6 @@
             
             alert('✅ CSV 파일이 다운로드되었습니다!');
         }
-        
-        // 페이지 로드 시 실행
-        loadResults();
     </script>
 </body>
 </html>
